@@ -5,10 +5,14 @@ import time
 import sys
 
 def stopPyautoguiDetect(region):
+    global inProgress
     #当鼠标移动至窗口外时暂停循环
     mousePosition_x,mousePosition_y = pyautogui.position()
     if (mousePosition_x < region[0] or mousePosition_y < region[1] or
             mousePosition_x > region[0]+region[2] or mousePosition_y > region[1]+region[3]):
+        if inProgress == 1:
+            print("鼠标移出了窗口区域，暂停运行")
+            inProgress = 0
         sys.exit()
 def locateImg(img:str, confidence:float, region:tuple=None):
     if not region:
@@ -23,23 +27,31 @@ def locateWindow(titlePath, confidence):
     while True:
         try:
             position = locateImg(titlePath, confidence=confidence)
-            region = (position[0], position[1],
-                    position[2], position[3]+735)
+            region = (position[0]-150, position[1],
+                    410, 770)
+            print("已定位窗口：",region)
             break
         except:
             pass
     return region
 def main(img, confidence, region):
+    global inProgress
     imgPath = "pic" + os.sep + img
     stopPyautoguiDetect(region)
+    if inProgress == 0:
+        print("开始运行")
+        inProgress = 1
     position = locateImg(imgPath, confidence, region)
     Center = pyautogui.center(position)
     clickMouse(Center[0], Center[1])
-
+inProgress=0
 print("-----本程序开源且完全免费，请勿为程序付费，小红书号：26549571963，github:lxy554021379-----")
-region = locateWindow(titlePath='pic/title.png', confidence=0.5)
-
+time.sleep(1)
+print("开始定位窗口，请保持窗口在前端")
+region = locateWindow(titlePath='pic/title.png', confidence=0.7)
+print("将鼠标移动至窗口内开始运行，移出窗口可暂停运行。")
 while True:
+
     try:
         main("start.png",0.7, region)
     except:
